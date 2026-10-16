@@ -1,0 +1,21 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ProjectArt from '../../components/ProjectArt.astro';
+import { projects } from '../../data/projects';
+import type { Project } from '../../data/projects';
+export function getStaticPaths() { return projects.map(project => ({ params: { slug: project.slug }, props: { project } })); }
+interface Props { project: Project; }
+const { project } = Astro.props;
+const index = projects.findIndex(p => p.slug === project.slug);
+const next = projects.length > 1 ? projects[(index + 1) % projects.length] : undefined;
+---
+<Layout title={`${project.title} — hongseongin`} description={project.summary}>
+  <main id="main" class="project-detail">
+    <a class="back-link" href="/#projects">← 모든 프로젝트</a>
+    <div class="detail-heading"><span class="eyebrow">{project.category} / {project.year}</span><h1>{project.title}<span>.</span></h1><p>{project.subtitle}</p></div>
+    {project.sample && <p class="sample-banner">예시 프로젝트입니다. 실제 작업 내용과 이미지로 교체할 수 있습니다.</p>}
+    <ProjectArt project={project} />
+    <div class="detail-body"><aside><dl><div><dt>ROLE</dt><dd>{project.role}</dd></div><div><dt>PERIOD</dt><dd>{project.period}</dd></div><div><dt>TOOLS & TOPICS</dt><dd>{project.tags.join(' / ')}</dd></div></dl><div class="detail-links">{project.demo && <a href={project.demo} target="_blank" rel="noopener noreferrer">프로젝트 실행 ↗<span class="sr-only"> (새 탭)</span></a>}{project.repository && <a href={project.repository} target="_blank" rel="noopener noreferrer">소스 코드 ↗<span class="sr-only"> (새 탭)</span></a>}</div></aside><div class="detail-sections"><p class="detail-summary">{project.summary}</p>{project.sections.map((section, i) => <section><span class="eyebrow">{String(i + 1).padStart(2, '0')}</span><h2>{section.title}</h2><p>{section.body}</p></section>)}</div></div>
+    {next && <a class="next-project" href={`/projects/${next.slug}/`}><span class="eyebrow">NEXT PROJECT</span><strong>{next.title} <span>↗</span></strong></a>}
+  </main>
+</Layout>

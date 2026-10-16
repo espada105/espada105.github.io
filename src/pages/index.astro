@@ -1,0 +1,219 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { profile } from '../data/profile';
+import { projects } from '../data/projects';
+
+type MapNode = {
+  id: string;
+  label: string;
+  description: string;
+  detail: string;
+  href?: string;
+  x: number;
+  y: number;
+  type: 'core' | 'branch' | 'leaf';
+  parent?: string;
+  highlights?: string[];
+};
+
+const nodes: MapNode[] = [
+  { id: 'profile', label: 'PROFILE', description: '홍성인 · AI Software Engineer', detail: 'LLM Agents와 AI Applications를 다루는 AI Software Engineer입니다.', href: profile.github, x: 900, y: 600, type: 'core' },
+  { id: 'skills', label: 'SKILLS', description: 'AI 엔지니어링 기술 스택', detail: '공개 기술 스택과 프로젝트에서 확인한 구현 기술입니다.', href: 'https://github.com/espada105/AI_Engineering_Tech_Stack', x: 1030, y: 470, type: 'branch', parent: 'profile' },
+  { id: 'projects', label: 'MAIN PROJECTS', description: '대표 구현 프로젝트', detail: '개인 또는 공동으로 진행한 대표 프로젝트입니다.', x: 1145, y: 605, type: 'branch', parent: 'profile' },
+  { id: 'research', label: 'RESEARCH', description: '논문 및 연구 활동', detail: '공개된 논문·연구 주제입니다.', x: 1010, y: 750, type: 'branch', parent: 'profile' },
+  { id: 'experience', label: 'EXPERIENCE', description: '경험과 수료 이력', detail: 'LinkedIn에 공개된 경험 및 수료 이력입니다.', x: 760, y: 730, type: 'branch', parent: 'profile' },
+  { id: 'contact', label: 'CONTACT', description: '공개 프로필 링크', detail: 'GitHub, LinkedIn, 이메일로 연락할 수 있습니다.', x: 715, y: 495, type: 'branch', parent: 'profile' },
+
+  { id: 'python', label: 'PYTHON', description: 'AI Engineering Tech Stack', detail: 'AI Engineering Tech Stack 학습 저장소에 명시된 Python 기반 학습 및 구현 환경입니다.', href: 'https://github.com/espada105/AI_Engineering_Tech_Stack', x: 1105, y: 345, type: 'leaf', parent: 'skills' },
+  { id: 'llm-agents', label: 'LLM AGENTS', description: 'LangChain · LangGraph', detail: 'LangChain과 LangGraph를 포함한 LLM 에이전트 학습 및 구현 기록입니다.', href: 'https://github.com/espada105/AI_Engineering_Tech_Stack', x: 1230, y: 430, type: 'leaf', parent: 'skills' },
+  { id: 'mcp-api', label: 'MCP + API', description: 'FastMCP · FastAPI', detail: 'FastMCP와 FastAPI를 이용한 에이전트·서비스 연결 기술입니다.', href: 'https://github.com/espada105/AI_Engineering_Tech_Stack', x: 1190, y: 555, type: 'leaf', parent: 'skills' },
+
+  { id: 'satellite-agent', label: 'SATELLITE IMAGE AGENT', description: 'FastAPI · MCP · RAG', detail: '위성 이미지 분석을 위한 MVP Skeleton입니다. FastAPI 오케스트레이터, MCP 서버, 하이브리드 RAG 구성을 포함합니다.', highlights: ['FastAPI 기반 오케스트레이터', 'MCP 위성 이미지 서버', 'Sparse + BM25 하이브리드 RAG'], href: 'https://github.com/espada105/Satellite_image_analysis_agent', x: 1295, y: 475, type: 'leaf', parent: 'projects' },
+  { id: 'medical-platform', label: 'MEDICAL AI PLATFORM', description: 'Agent2Agent · MCP', detail: 'Agent2Agent 프로토콜과 Model Context Protocol을 활용하는 의료 AI 에이전트 플랫폼 프로젝트입니다.', highlights: ['Agent2Agent 프로토콜 기반 협업', 'Model Context Protocol 연동'], href: 'https://github.com/espada105/Medical-Artificial-Intelligence-Platform', x: 1325, y: 605, type: 'leaf', parent: 'projects' },
+  { id: 'uav-llm', label: 'UAV CONTROL + LLM', description: 'Unity · Ollama', detail: '자연어 명령을 드론 제어 명령으로 변환하는 Unity 시뮬레이션 공동 프로젝트입니다.', highlights: ['Unity 기반 드론 시뮬레이션', 'Ollama · Llama 3:8B', '자연어 명령을 UAV 제어로 변환'], href: 'https://github.com/espada105/UAV-control-using-LLM', x: 1285, y: 735, type: 'leaf', parent: 'projects' },
+  { id: 'newrecipe', label: 'NEWRECIPE', description: 'Multimodal recipe assistant', detail: 'Llama 3.1·Unsloth·CLIP을 사용해 이미지, 텍스트, 음성 입력으로 레시피를 탐색하는 프로젝트입니다.', highlights: ['Llama 3.1-8B · Unsloth', 'CLIP 이미지 인식', '텍스트 · 이미지 · 음성 레시피 탐색'], href: 'https://github.com/espada105/NewRecipe', x: 1190, y: 775, type: 'leaf', parent: 'projects' },
+
+  { id: 'satellite-agent-paper', label: 'SATELLITE AGENT', description: 'KSAS · multimodal AI', detail: '위성 간 협업 감시, 이상 탐지, 자연어 보고 생성을 다루는 멀티모달 AI 기반 자율 위성 에이전트 개념 연구입니다.', x: 1240, y: 1010, type: 'leaf', parent: 'research' },
+  { id: 'hrnet-paper', label: 'HRNET MRI CLASSIFICATION', description: 'KIIT · brain tumor MRI', detail: 'HRNet 기반 뇌종양 MRI 분류 연구입니다. 저장소에 HRNet-W48-C-SSLD 99.69% 정확도가 보고되어 있습니다.', href: 'https://github.com/espada105/NeuraSeg-HRNet-High-Resolution-MRI-Brain-Tumor-Detection-and-Segmentation', x: 1370, y: 915, type: 'leaf', parent: 'research' },
+  { id: 'space-security-paper', label: 'SPACE SECURITY AI', description: 'KASS · policy research', detail: '우주 안보 산업에서 AI 기술의 적용 동향과 정책을 다루는 연구입니다.', x: 1240, y: 800, type: 'leaf', parent: 'research' },
+
+  { id: 'telepix', label: 'TELEPIX', description: 'AI Software Engineer', detail: 'LinkedIn에 공개된 TelePIX Co., Ltd. 경험입니다.', href: 'https://www.linkedin.com/in/seongin-hong-2b95b7345/', x: 510, y: 980, type: 'leaf', parent: 'experience' },
+  { id: 'lg-aimers', label: 'LG AIMERS', description: '5th · 6th · 7th', detail: 'LG AI Research의 LG Aimers 5·6·7기 수료 이력입니다.', href: 'https://github.com/espada105/AI_Predicting_Pregnancy_Success', x: 700, y: 1005, type: 'leaf', parent: 'experience' },
+  { id: 'hsu-lab', label: 'HSU AEROSPACE AI LAB', description: 'undergraduate research', detail: '한서대학교 대규모 항공우주 지능시스템 연구실 학부연구생 활동입니다.', href: 'https://www.linkedin.com/in/seongin-hong-2b95b7345/', x: 480, y: 775, type: 'leaf', parent: 'experience' },
+
+  { id: 'github', label: 'GITHUB', description: 'espada105', detail: '공개 코드와 프로젝트 기록입니다.', href: profile.github, x: 400, y: 290, type: 'leaf', parent: 'contact' },
+  { id: 'linkedin', label: 'LINKEDIN', description: 'Seongin Hong', detail: '공개된 경력, 연구, 프로젝트 이력입니다.', href: 'https://www.linkedin.com/in/seongin-hong-2b95b7345/', x: 375, y: 485, type: 'leaf', parent: 'contact' },
+  { id: 'email', label: 'EMAIL', description: 'tjddls207@gmail.com', detail: '프로젝트, 채용, 협업 관련 연락은 이메일로 받을 수 있습니다.', href: 'mailto:tjddls207@gmail.com', x: 560, y: 600, type: 'leaf', parent: 'contact' },
+];
+
+const indexById = new Map(nodes.map((node, index) => [node.id, index]));
+const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [[indexById.get(node.parent)!, index]] : []);
+---
+<Layout homeShell>
+  <main id="main" class="portfolio-map">
+    <header class="map-header"><a href="/">HONGSEONGIN</a><a class="overview-link" href="/overview/">OVERVIEW ↗</a></header>
+    <div class="map-viewport" tabindex="0" aria-label="포트폴리오 그래프. 드래그 또는 휠로 탐색하고, 항목을 선택해 상세 정보를 엽니다.">
+      <div class="map-world">
+        <svg class="map-lines" viewBox="0 0 1800 1200" aria-hidden="true">
+          {links.map(([from, to]) => <line data-from={from} data-to={to} />)}
+        </svg>
+        {nodes.map((node, index) => <button class:list={['map-node', node.type]} type="button" data-index={index} data-node={node.id} data-parent={node.parent} data-title={node.label} data-description={node.description} data-detail={node.detail} data-highlights={JSON.stringify(node.highlights ?? [])} data-href={node.href} style={`--x:${node.x}px;--y:${node.y}px`} aria-controls="node-detail"><span>{node.label}</span></button>)}
+      </div>
+      <div class="node-tooltip" role="status" aria-live="polite"><span class="tooltip-label"></span><p class="tooltip-copy"></p></div>
+    </div>
+    <div class="map-identity">SEONGINHONG</div>
+    <div class="map-action-log" aria-live="polite" aria-atomic="false"></div>
+    <div class="map-hud"><span>SCROLL OR DRAG TO EXPLORE</span><span class="map-coordinates">X 0000 Y 0000</span></div>
+    <nav class="map-project-index" aria-label="기존 프로젝트 상세 페이지">
+      {projects.map((project) => <a href={`/projects/${project.slug}/`}>{project.title}</a>)}
+    </nav>
+    <aside class="detail-panel" aria-hidden="true">
+      <button class="detail-close" type="button" aria-label="상세 패널 닫기">×</button><button class="detail-back" type="button" hidden>← BACK</button>
+      <section id="node-detail" tabindex="-1"><p class="detail-kicker"></p><h1 class="detail-title"></h1><strong class="detail-subtitle"></strong><div class="detail-copy"></div><div class="detail-landing" hidden><p>PROJECT HIGHLIGHTS</p><ul></ul></div><nav class="detail-children" aria-label="하위 항목"></nav><a class="detail-link" target="_blank" rel="noreferrer">SOURCE ↗</a></section>
+    </aside>
+  </main>
+</Layout>
+<script>
+  const viewport=document.querySelector<HTMLElement>('.map-viewport'),world=document.querySelector<HTMLElement>('.map-world'),tooltip=document.querySelector<HTMLElement>('.node-tooltip'),tipLabel=document.querySelector<HTMLElement>('.tooltip-label'),tipCopy=document.querySelector<HTMLElement>('.tooltip-copy'),panel=document.querySelector<HTMLElement>('.detail-panel'),coordinates=document.querySelector<HTMLElement>('.map-coordinates'),actionLog=document.querySelector<HTMLElement>('.map-action-log'),detail=document.querySelector<HTMLElement>('#node-detail'),detailKicker=document.querySelector<HTMLElement>('.detail-kicker'),detailTitle=document.querySelector<HTMLElement>('.detail-title'),detailSubtitle=document.querySelector<HTMLElement>('.detail-subtitle'),detailCopy=document.querySelector<HTMLElement>('.detail-copy'),detailLink=document.querySelector<HTMLAnchorElement>('.detail-link');
+  const buttons=[...document.querySelectorAll<HTMLButtonElement>('.map-node')],lines=[...document.querySelectorAll<SVGLineElement>('.map-lines line')];
+  if (!detailSubtitle) throw new Error('Missing detail subtitle');
+  if(viewport&&world&&tooltip&&tipLabel&&tipCopy&&panel&&coordinates&&actionLog&&detail&&detailKicker&&detailTitle&&detailCopy&&detailLink){let scale=.72,position={x:0,y:0},dragging=false,start={x:0,y:0};const origin=(button:HTMLButtonElement)=>({x:Number.parseFloat(button.style.getPropertyValue('--x')),y:Number.parseFloat(button.style.getPropertyValue('--y'))}),points=buttons.map(origin),apply=()=>world.style.transform=`translate3d(${position.x}px,${position.y}px,0) scale(${scale})`;lines.forEach(line=>{const from=points[Number(line.dataset.from)],to=points[Number(line.dataset.to)];line.setAttribute('x1',`${from.x}`);line.setAttribute('y1',`${from.y}`);line.setAttribute('x2',`${to.x}`);line.setAttribute('y2',`${to.y}`)});const pad=(n:number)=>Math.round(n).toString().padStart(4,'0'),updateCoordinates=(x:number,y:number)=>{const r=viewport.getBoundingClientRect();coordinates.textContent=`X ${pad((x-r.left-position.x)/scale)} Y ${pad((y-r.top-position.y)/scale)}`},center=()=>{const r=viewport.getBoundingClientRect();scale=Math.max(.35,Math.min(.82,r.width/1050));position={x:r.width/2-900*scale,y:r.height/2-600*scale};apply();updateCoordinates(r.left+r.width/2,r.top+r.height/2)};let lastLog='';const note=(message:string)=>{if(message===lastLog)return;lastLog=message;const now=new Date(),stamp=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;const item=document.createElement('p');item.textContent=`> [${stamp}] ${message}`;actionLog.prepend(item);while(actionLog.children.length>3)actionLog.lastElementChild?.remove()};const showTip=(button:HTMLButtonElement,event:PointerEvent)=>{tipLabel.textContent=button.dataset.title||'';tipCopy.textContent=button.dataset.description||'';tooltip.classList.add('visible');const r=viewport.getBoundingClientRect();tooltip.style.left=`${Math.min(r.width-230,Math.max(16,event.clientX-r.left+18))}px`;tooltip.style.top=`${Math.min(r.height-100,Math.max(16,event.clientY-r.top+18))}px`;world.dataset.active=button.dataset.index||'';note(`HOVER ${button.dataset.node?.toUpperCase()}`)};const hideTip=()=>{tooltip.classList.remove('visible');if(!panel.dataset.node)world.dataset.active=''};const open=(button:HTMLButtonElement,push=true)=>{const id=button.dataset.node||'';panel.dataset.node=id;panel.setAttribute('aria-hidden','false');world.dataset.active=button.dataset.index||'';detailKicker.textContent=button.classList.contains('leaf')?'DETAIL / PORTFOLIO NODE':'SECTION / PORTFOLIO MAP';detailTitle.textContent=button.dataset.title||'';detailSubtitle.textContent=button.dataset.description||'';detailCopy.textContent=button.dataset.detail||'';const href=button.dataset.href;if(href){detailLink.href=href;detailLink.hidden=false}else detailLink.hidden=true;note(`OPEN ${id.toUpperCase()}`);if(push)history.pushState({node:id},'',`?node=${id}`);detail.focus()};const close=(push=true)=>{panel.dataset.node='';panel.setAttribute('aria-hidden','true');world.dataset.active='';note('RETURN TO MAP');if(push)history.pushState({},'',location.pathname);viewport.focus()};center();window.addEventListener('resize',center);const initial=new URLSearchParams(location.search).get('node'),initialButton=buttons.find(button=>button.dataset.node===initial);if(initialButton)open(initialButton,false);buttons.forEach(button=>{button.addEventListener('pointerenter',event=>showTip(button,event));button.addEventListener('pointermove',event=>showTip(button,event));button.addEventListener('pointerleave',hideTip);button.addEventListener('click',()=>{note(`CLICK ${button.dataset.node?.toUpperCase()}`);open(button)});button.addEventListener('pointerdown',event=>event.preventDefault())});viewport.addEventListener('pointerdown',event=>{event.preventDefault();if((event.target as HTMLElement).closest('.map-node'))return;dragging=true;start={x:event.clientX,y:event.clientY};viewport.setPointerCapture(event.pointerId);viewport.classList.add('dragging');note('DRAG START')});viewport.addEventListener('pointermove',event=>{updateCoordinates(event.clientX,event.clientY);if(!dragging)return;position.x+=event.clientX-start.x;position.y+=event.clientY-start.y;start={x:event.clientX,y:event.clientY};apply()});const release=(event:PointerEvent)=>{if(dragging)note('DRAG END');dragging=false;viewport.classList.remove('dragging');if(viewport.hasPointerCapture(event.pointerId))viewport.releasePointerCapture(event.pointerId)};viewport.addEventListener('pointerup',release);viewport.addEventListener('pointercancel',release);viewport.addEventListener('wheel',event=>{event.preventDefault();const r=viewport.getBoundingClientRect(),old=scale;scale=Math.max(.35,Math.min(1.05,scale-event.deltaY*.00055));const x=(event.clientX-r.left-position.x)/old,y=(event.clientY-r.top-position.y)/old;position={x:event.clientX-r.left-x*scale,y:event.clientY-r.top-y*scale};apply();updateCoordinates(event.clientX,event.clientY);note('SCROLL INPUT')},{passive:false});document.querySelector<HTMLButtonElement>('.detail-close')?.addEventListener('click',()=>close());viewport.addEventListener('keydown',event=>{if(event.key==='Escape')close();if(event.key==='Home'){center();event.preventDefault()}});window.addEventListener('popstate',()=>{const id=new URLSearchParams(location.search).get('node'),button=buttons.find(candidate=>candidate.dataset.node===id);button?open(button,false):close(false)})}
+</script>
+<script>
+  const hoverNodes = [...document.querySelectorAll<HTMLButtonElement>('.map-node')];
+  const hoverLines = [...document.querySelectorAll<SVGLineElement>('.map-lines line')];
+  const setConnectedLines = (index?: string) => hoverLines.forEach((line) => line.classList.toggle('is-connected', Boolean(index) && (line.dataset.from === index || line.dataset.to === index)));
+  hoverNodes.forEach((node) => {
+    node.addEventListener('pointerenter', () => setConnectedLines(node.dataset.index));
+    node.addEventListener('pointerleave', () => setConnectedLines());
+    node.addEventListener('focus', () => setConnectedLines(node.dataset.index));
+    node.addEventListener('blur', () => setConnectedLines());
+  });
+</script>
+<script>
+  const childMenu = document.querySelector<HTMLElement>('.detail-children');
+  const graphPanel = document.querySelector<HTMLElement>('.detail-panel');
+  const graphNodes = [...document.querySelectorAll<HTMLButtonElement>('.map-node')];
+  const renderChildren = () => {
+    if (!childMenu || !graphPanel) return;
+    const active = graphPanel.dataset.node;
+    const children = graphNodes.filter((node) => node.dataset.parent === active);
+    childMenu.replaceChildren();
+    childMenu.hidden = children.length === 0;
+    children.forEach((child, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.innerHTML = `<span>${String(index + 1).padStart(2, '0')}</span>${child.dataset.title || ''}<b>↗</b>`;
+      button.addEventListener('click', () => window.dispatchEvent(new CustomEvent('portfolio:focus-node', { detail: child.dataset.node })));
+      childMenu.append(button);
+    });
+  };
+  if (graphPanel) new MutationObserver(renderChildren).observe(graphPanel, { attributes: true, attributeFilter: ['data-node'] });
+  renderChildren();
+</script>
+<script>
+  const panelBack = document.querySelector<HTMLButtonElement>('.detail-back');
+  const panelForMode = document.querySelector<HTMLElement>('.detail-panel');
+  const allGraphNodes = [...document.querySelectorAll<HTMLButtonElement>('.map-node')];
+  const syncDetailMode = () => {
+    if (!panelForMode || !panelBack) return;
+    const current = allGraphNodes.find((node) => node.dataset.node === panelForMode.dataset.node);
+    const parent = current?.dataset.parent;
+    panelForMode.classList.toggle('leaf-detail', current?.classList.contains('leaf') ?? false);
+    panelBack.hidden = !parent;
+    panelBack.onclick = () => allGraphNodes.find((node) => node.dataset.node === parent)?.click();
+  };
+  if (panelForMode) new MutationObserver(syncDetailMode).observe(panelForMode, { attributes: true, attributeFilter: ['data-node'] });
+  syncDetailMode();
+</script>
+<script>
+  const landingPanel = document.querySelector<HTMLElement>('.detail-landing');
+  const landingList = landingPanel?.querySelector<HTMLUListElement>('ul');
+  const landingGraphPanel = document.querySelector<HTMLElement>('.detail-panel');
+  const landingNodes = [...document.querySelectorAll<HTMLButtonElement>('.map-node')];
+  const renderLanding = () => {
+    if (!landingPanel || !landingList || !landingGraphPanel) return;
+    const node = landingNodes.find((candidate) => candidate.dataset.node === landingGraphPanel.dataset.node);
+    const highlights = node ? JSON.parse(node.dataset.highlights || '[]') as string[] : [];
+    landingList.replaceChildren(...highlights.map((highlight) => {
+      const item = document.createElement('li');
+      item.textContent = highlight;
+      return item;
+    }));
+    landingPanel.hidden = highlights.length === 0;
+  };
+  if (landingGraphPanel) new MutationObserver(renderLanding).observe(landingGraphPanel, { attributes: true, attributeFilter: ['data-node'] });
+  renderLanding();
+</script>
+<script>
+  const cameraViewport = document.querySelector<HTMLElement>('.map-viewport');
+  const cameraWorld = document.querySelector<HTMLElement>('.map-world');
+  const cameraNodes = [...document.querySelectorAll<HTMLButtonElement>('.map-node')];
+  const transformFor = (x: number, y: number, scale: number) => {
+    const rect = cameraViewport!.getBoundingClientRect();
+    return `translate3d(${rect.width / 2 - x * scale}px,${rect.height / 2 - y * scale}px,0) scale(${scale})`;
+  };
+  const playTransform = (from: string, to: string, duration: number) => cameraWorld!.animate(
+    [{ transform: from }, { transform: to }],
+    { duration, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'forwards' },
+  ).finished;
+  window.addEventListener('portfolio:focus-node', async (event) => {
+    const id = (event as CustomEvent<string>).detail;
+    const node = cameraNodes.find((candidate) => candidate.dataset.node === id);
+    if (!node || !cameraViewport || !cameraWorld) return;
+    const x = Number.parseFloat(node.style.getPropertyValue('--x'));
+    const y = Number.parseFloat(node.style.getPropertyValue('--y'));
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    cameraWorld.getAnimations().forEach((animation) => animation.cancel());
+    cameraNodes.forEach((candidate) => candidate.classList.toggle('is-camera-focus', candidate === node));
+    const overviewScale = Math.max(.2, Math.min(.56, cameraViewport.clientWidth / 1840, cameraViewport.clientHeight / 1240));
+    const overview = transformFor(900, 600, overviewScale);
+    const current = getComputedStyle(cameraWorld).transform;
+    if (reduced) {
+      node.click();
+      cameraWorld.style.transform = transformFor(x, y, 1.35);
+      return;
+    }
+    await playTransform(current, overview, 440);
+    cameraWorld.style.transform = overview;
+    node.click();
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    const focused = transformFor(x, y, 1.35);
+    await playTransform(overview, focused, 760);
+    cameraWorld.style.transform = focused;
+  });
+</script>
+<script>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const liveNodes = [...document.querySelectorAll<HTMLButtonElement>('.map-node')];
+  const liveLines = [...document.querySelectorAll<SVGLineElement>('.map-lines line')];
+  const basePositions = liveNodes.map((node) => ({
+    node,
+    x: Number.parseFloat(node.style.getPropertyValue('--x')),
+    y: Number.parseFloat(node.style.getPropertyValue('--y')),
+    phase: Number(node.dataset.index || 0) * 0.73,
+  }));
+
+  if (!reduceMotion.matches) {
+    const animateGraph = (time: number) => {
+      const positions = basePositions.map(({ node, x, y, phase }) => {
+        const amplitude = node.classList.contains('leaf') ? 6 : node.classList.contains('branch') ? 4 : 2;
+        const offsetX = Math.sin(time / 2900 + phase) * amplitude;
+        const offsetY = Math.cos(time / 3500 + phase * 1.3) * amplitude;
+        node.style.translate = `${offsetX}px ${offsetY}px`;
+        return { x: x + offsetX, y: y + offsetY };
+      });
+
+      liveLines.forEach((line) => {
+        const from = positions[Number(line.dataset.from)];
+        const to = positions[Number(line.dataset.to)];
+        line.setAttribute('x1', `${from.x}`);
+        line.setAttribute('y1', `${from.y}`);
+        line.setAttribute('x2', `${to.x}`);
+        line.setAttribute('y2', `${to.y}`);
+      });
+      requestAnimationFrame(animateGraph);
+    };
+    requestAnimationFrame(animateGraph);
+  }
+</script>

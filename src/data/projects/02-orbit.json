@@ -1,0 +1,19 @@
+{
+  "slug": "orbit-study",
+  "order": 2,
+  "title": "Orbit",
+  "subtitle": "흩어진 생각을 하나의 흐름으로",
+  "category": "App",
+  "year": "SAMPLE 02",
+  "cover": "orbit",
+  "tags": ["Interaction", "Product"],
+  "summary": "앱 프로젝트를 소개하는 예시입니다. 실제 앱의 사용 대상과 핵심 경험으로 교체할 수 있습니다.",
+  "role": "역할 입력 예정",
+  "period": "기간 입력 예정",
+  "sample": true,
+  "sections": [
+    { "title": "프로젝트 소개", "body": "프로젝트를 시작한 계기와 사용자에게 제공하려는 경험을 작성합니다." },
+    { "title": "주요 기능과 구현", "body": "가장 중요한 기능, 담당한 역할, 구현 과정에서 해결한 문제를 작성합니다." },
+    { "title": "결과와 다음 단계", "body": "검증한 결과와 앞으로의 개선 방향을 기록합니다. 예시 수치를 실제 성과처럼 사용하지 않습니다." }
+  ]
+}

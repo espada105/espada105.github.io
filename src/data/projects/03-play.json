@@ -1,0 +1,18 @@
+{
+  "slug": "playground-study",
+  "order": 3,
+  "title": "A little playground",
+  "subtitle": "호기심에서 출발한 작은 실험들",
+  "category": "Experiment",
+  "year": "SAMPLE 03",
+  "cover": "play",
+  "tags": ["Creative coding", "Exploration"],
+  "summary": "작은 실험이나 오픈소스 프로젝트를 기록하는 예시입니다. 완성된 제품뿐 아니라 탐구 과정도 소개할 수 있습니다.",
+  "role": "역할 입력 예정",
+  "period": "기간 입력 예정",
+  "sample": true,
+  "sections": [
+    { "title": "실험의 출발점", "body": "궁금했던 질문과 확인하고 싶었던 아이디어를 작성합니다." },
+    { "title": "만들면서 발견한 것", "body": "실험 방법, 코드에서 흥미로웠던 부분, 시행착오를 기록합니다." }
+  ]
+}

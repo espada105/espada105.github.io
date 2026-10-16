@@ -1,0 +1,18 @@
+---
+import type { Project } from '../data/projects';
+interface Props { project: Project; }
+const { project } = Astro.props;
+---
+<div class:list={['project-art', `art-${project.cover}`]} aria-hidden="true">
+  {project.image ? <img src={project.image} alt="" loading="lazy" width="1200" height="850" /> : <>
+    {project.cover === 'form' && <div class="mock-window">
+      <div class="mock-toolbar"><span>f.</span><span>FORM STUDIO <i>↗</i></span></div>
+      <div class="mock-content"><small>LESS, BUT BETTER.</small><strong>Make room<br/>for what<br/><em>matters.</em></strong><span class="mock-link">Explore the collection <b>↗</b></span></div>
+      <div class="mock-sculpture"><div></div><div></div><div></div></div>
+      <div class="mock-bottom">OBJECTS WITH INTENTION <span>EST. 2026</span></div>
+    </div>}
+    {project.cover === 'orbit' && <div class="orbit-composition"><div class="orbit-word">orbit</div><div class="phone"><div class="phone-notch"></div><small>YOUR OWN PACE</small><strong>A little more<br/>headspace.</strong><div class="phone-circle"><span>Take a<br/><i>breath.</i></span></div><div class="phone-line"></div><div class="phone-tabs"><span>Today</span><span>Explore</span><span>You</span></div></div><span class="orbit-caption">A SPACE FOR YOUR MIND.</span></div>}
+    {project.cover === 'play' && <div class="play-composition"><span>EXPERIMENT NO. 003</span><div class="play-flower">✳</div><strong>What<br/>if<span>?</span></strong><small>A LITTLE CURIOSITY GOES A LONG WAY.</small></div>}
+    <span class="art-label">CONCEPT PREVIEW</span>
+  </>}
+</div>

@@ -1,0 +1,12 @@
+<svg width="1200" height="1440" viewBox="0 0 1200 1440" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="1440" fill="#D9D0C1"/>
+  <circle cx="600" cy="485" r="203" fill="#B6A896"/>
+  <path d="M179 1440C197 1084 372 876 600 876C828 876 1003 1084 1021 1440H179Z" fill="#8B7968"/>
+  <path d="M335 493C335 347 453 229 600 229C747 229 865 347 865 493V566H335V493Z" fill="#6E6257"/>
+  <path d="M388 478C388 315 482 249 600 249C718 249 812 315 812 478V537H388V478Z" fill="#786A5D"/>
+  <circle cx="528" cy="498" r="13" fill="#51483F"/>
+  <circle cx="672" cy="498" r="13" fill="#51483F"/>
+  <path d="M540 616C575 639 625 639 660 616" stroke="#51483F" stroke-width="13" stroke-linecap="round"/>
+  <path d="M521 568C545 580 655 580 679 568" stroke="#8F7E6B" stroke-width="10" stroke-linecap="round"/>
+  <text x="72" y="1356" fill="#F4F0E9" font-family="Arial, sans-serif" font-size="31" letter-spacing="7">PROFILE IMAGE</text>
+</svg>

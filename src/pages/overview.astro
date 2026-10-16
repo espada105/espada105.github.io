@@ -1,0 +1,31 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { profile } from '../data/profile';
+
+const projects = [
+  ['Satellite Image Analysis Agent', 'FastAPI · MCP · RAG', 'https://github.com/espada105/Satellite_image_analysis_agent'],
+  ['Medical AI Platform', 'Agent2Agent · MCP', 'https://github.com/espada105/Medical-Artificial-Intelligence-Platform'],
+  ['UAV Control using LLM', 'Unity · Ollama', 'https://github.com/espada105/UAV-control-using-LLM'],
+  ['NewRecipe', 'Llama 3.1 · Unsloth · CLIP', 'https://github.com/espada105/NewRecipe'],
+];
+const skills = ['Python', 'LLM Agents', 'LangChain', 'LangGraph', 'FastAPI', 'FastMCP', 'MCP', 'Computer Vision', 'Unity', 'Ollama'];
+---
+<Layout title="Hong Seongin — Overview" description="AI Software Engineer Hong Seongin의 경력, 프로젝트, 연구 요약" homeShell>
+  <main id="main" class="overview-page">
+    <header class="overview-nav"><a href="/">HONGSEONGIN</a><a href="/">OPEN GRAPH ↗</a></header>
+    <section class="overview-hero">
+      <p>AI SOFTWARE ENGINEER / SEOUL, KOREA</p>
+      <h1>Hong<br />Seongin<span>.</span></h1>
+      <div><strong>LLM Agents &amp;<br />AI Applications</strong><p>AI 시스템을 탐구하고 실제 문제를 풀기 위한 에이전트와 애플리케이션을 만듭니다.</p></div>
+      <a class="overview-email" href="mailto:tjddls207@gmail.com">tjddls207@gmail.com ↗</a>
+    </section>
+    <section class="overview-grid" aria-label="핵심 정보">
+      <article><p>01 / EXPERIENCE</p><h2>TelePIX</h2><span>AI Software Engineer</span></article>
+      <article><p>02 / FOCUS</p><h2>Agents, vision,<br />space AI.</h2><span>LLM · MCP · Computer Vision</span></article>
+      <article><p>03 / EDUCATION</p><h2>HanSeo<br />University</h2><span>2020 — 2026</span></article>
+    </section>
+    <section class="overview-section"><p>SELECTED PROJECTS</p><div class="overview-list">{projects.map(([title, stack, href], index) => <a href={href} target="_blank" rel="noreferrer"><span>0{index + 1}</span><h2>{title}</h2><small>{stack}</small><b>↗</b></a>)}</div></section>
+    <section class="overview-section overview-skills"><p>TECHNICAL FOCUS</p><div>{skills.map((skill) => <span>{skill}</span>)}</div></section>
+    <section class="overview-contact"><p>LET'S TALK</p><h2>AI systems,<br />built to work.</h2><div><a href="mailto:tjddls207@gmail.com">EMAIL ↗</a><a href={profile.github} target="_blank" rel="noreferrer">GITHUB ↗</a><a href="https://www.linkedin.com/in/seongin-hong-2b95b7345/" target="_blank" rel="noreferrer">LINKEDIN ↗</a></div></section>
+  </main>
+</Layout>
