@@ -21,4 +21,5 @@
 @media(max-width:760px){.detail-back{top:18px;left:18px}.detail-panel.leaf-detail{width:100%;padding:5rem 2rem 4rem}.portfolio-map:has(.detail-panel.leaf-detail[aria-hidden='false']) .map-viewport{right:0}.detail-panel.leaf-detail h1{font-size:clamp(3.2rem,14vw,5.2rem)}.detail-panel.leaf-detail section>div{font-size:1rem}.detail-landing{margin-top:42px}}
 @media(prefers-reduced-motion:reduce){.detail-children{animation:none}}
 .detail-landing ul{counter-reset:highlights}.detail-landing li{counter-increment:highlights}.detail-landing li::before{content:counter(highlights,decimal-leading-zero)}
-.map-node.leaf.is-camera-focus{color:#f4f4ef;font-size:16px;font-weight:700;letter-spacing:-.055em}.map-node.leaf.is-camera-focus::before{width:12px;height:12px;box-shadow:0 0 16px #ffffffa8}
+.map-node.leaf.is-camera-focus{color:#f4f4ef;font-size:12px;font-weight:700;letter-spacing:-.06em}.map-node.leaf.is-camera-focus::before{width:12px;height:12px;box-shadow:0 0 16px #ffffffa8}
+.map-node.is-board-focus{color:#fff;text-shadow:0 0 10px #fff,0 0 22px #ffffffb8}.map-node.is-board-focus::before{box-shadow:0 0 14px #fff,0 0 28px #ffffff9c}.map-lines line.is-board-focus{stroke:#fff;stroke-opacity:1;stroke-width:2.4;filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 13px #fff)}

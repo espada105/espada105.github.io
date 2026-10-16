@@ -117,14 +117,37 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
   const allGraphNodes = [...document.querySelectorAll<HTMLButtonElement>('.map-node')];
   const syncDetailMode = () => {
     if (!panelForMode || !panelBack) return;
+    const first = panelForMode.getBoundingClientRect();
+    const wasLeaf = panelForMode.classList.contains('leaf-detail');
     const current = allGraphNodes.find((node) => node.dataset.node === panelForMode.dataset.node);
     const parent = current?.dataset.parent;
-    panelForMode.classList.toggle('leaf-detail', current?.classList.contains('leaf') ?? false);
+    const isLeaf = current?.classList.contains('leaf') ?? false;
+    panelForMode.classList.toggle('leaf-detail', isLeaf);
     panelBack.hidden = !parent;
     panelBack.onclick = () => allGraphNodes.find((node) => node.dataset.node === parent)?.click();
+    const last = panelForMode.getBoundingClientRect();
+    if (wasLeaf !== isLeaf && panelForMode.getAttribute('aria-hidden') === 'false' && first.width && last.width) {
+      const animation = panelForMode.animate([
+        { transformOrigin: 'right center', transform: `translateX(${first.left - last.left}px) scaleX(${first.width / last.width})` },
+        { transformOrigin: 'right center', transform: 'translateX(0) scaleX(1)' },
+      ], { duration: 420, easing: 'cubic-bezier(.16,1,.3,1)' });
+      animation.finished.then(() => animation.cancel());
+    }
   };
   if (panelForMode) new MutationObserver(syncDetailMode).observe(panelForMode, { attributes: true, attributeFilter: ['data-node'] });
   syncDetailMode();
+</script>
+<script>
+  const focusPanel = document.querySelector<HTMLElement>('.detail-panel');
+  const focusNodes = [...document.querySelectorAll<HTMLButtonElement>('.map-node')];
+  const focusLines = [...document.querySelectorAll<SVGLineElement>('.map-lines line')];
+  const renderBoardFocus = () => {
+    const index = focusNodes.find((node) => node.dataset.node === focusPanel?.dataset.node)?.dataset.index;
+    focusNodes.forEach((node) => node.classList.toggle('is-board-focus', Boolean(index) && node.dataset.index === index));
+    focusLines.forEach((line) => line.classList.toggle('is-board-focus', Boolean(index) && (line.dataset.from === index || line.dataset.to === index)));
+  };
+  if (focusPanel) new MutationObserver(renderBoardFocus).observe(focusPanel, { attributes: true, attributeFilter: ['data-node'] });
+  renderBoardFocus();
 </script>
 <script>
   const landingPanel = document.querySelector<HTMLElement>('.detail-landing');
@@ -182,6 +205,11 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
     await playTransform(overview, focused, 760);
     cameraWorld.style.transform = focused;
   });
+</script>
+<script>
+  const safeDragViewport = document.querySelector<HTMLElement>('.map-viewport');
+  safeDragViewport?.addEventListener('lostpointercapture', () => safeDragViewport.classList.remove('dragging'));
+  safeDragViewport?.addEventListener('pointercancel', () => safeDragViewport.classList.remove('dragging'));
 </script>
 <script>
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
