@@ -59,7 +59,7 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
         </svg>
         {nodes.map((node, index) => <button class:list={['map-node', node.type]} type="button" data-index={index} data-node={node.id} data-parent={node.parent} data-title={node.label} data-description={node.description} data-detail={node.detail} data-highlights={JSON.stringify(node.highlights ?? [])} data-href={node.href} style={`--x:${node.x}px;--y:${node.y}px`} aria-controls="node-detail"><span>{node.label}</span></button>)}
       </div>
-      <div class="node-tooltip" role="status" aria-live="polite"><span class="tooltip-label"></span><p class="tooltip-copy"></p></div>
+      <div class="node-tooltip" role="status" aria-live="polite"><span class="tooltip-label"></span><p class="tooltip-copy"></p><button class="tooltip-open" type="button">OPEN ↗</button></div>
     </div>
     <div class="map-identity">SEONGINHONG</div>
     <div class="map-action-log" aria-live="polite" aria-atomic="false"></div>
@@ -88,6 +88,67 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
     node.addEventListener('pointerleave', () => setConnectedLines());
     node.addEventListener('focus', () => setConnectedLines(node.dataset.index));
     node.addEventListener('blur', () => setConnectedLines());
+  });
+</script>
+<script>
+  const hoverCard = document.querySelector<HTMLElement>('.node-tooltip');
+  const hoverCardOpen = document.querySelector<HTMLButtonElement>('.tooltip-open');
+  const hoverViewport = document.querySelector<HTMLElement>('.map-viewport');
+  const hoverDetailPanel = document.querySelector<HTMLElement>('.detail-panel');
+  const hoverWorld = document.querySelector<HTMLElement>('.map-world');
+  const hoverDetail = document.querySelector<HTMLElement>('#node-detail');
+  const hoverKicker = document.querySelector<HTMLElement>('.detail-kicker');
+  const hoverTitle = document.querySelector<HTMLElement>('.detail-title');
+  const hoverSubtitle = document.querySelector<HTMLElement>('.detail-subtitle');
+  const hoverCopy = document.querySelector<HTMLElement>('.detail-copy');
+  const hoverLink = document.querySelector<HTMLAnchorElement>('.detail-link');
+  const hoverCardNodes = [...document.querySelectorAll<HTMLButtonElement>('.map-node')];
+  let hoverCardNode: HTMLButtonElement | undefined;
+  let hoverLeaveTimer = 0;
+  const placeHoverCard = (node: HTMLButtonElement) => {
+    if (!hoverCard || !hoverViewport) return;
+    const nodeRect = node.getBoundingClientRect();
+    const viewportRect = hoverViewport.getBoundingClientRect();
+    hoverCard.style.left = `${Math.min(viewportRect.width - 230, Math.max(16, nodeRect.left - viewportRect.left + 18))}px`;
+    hoverCard.style.top = `${Math.min(viewportRect.height - 110, Math.max(16, nodeRect.bottom - viewportRect.top + 12))}px`;
+  };
+  hoverCardNodes.forEach((node) => {
+    node.addEventListener('pointerenter', () => { hoverCardNode = node; window.clearTimeout(hoverLeaveTimer); });
+    node.addEventListener('pointerleave', (event: PointerEvent) => {
+      event.stopImmediatePropagation();
+      hoverLeaveTimer = window.setTimeout(() => { if (!hoverCard?.matches(':hover')) hoverCard?.classList.remove('visible'); }, 100);
+    }, true);
+    node.addEventListener('click', (event: MouseEvent) => {
+      if (node.dataset.openDetail === 'true') { delete node.dataset.openDetail; return; }
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      hoverCardNode = node;
+      placeHoverCard(node);
+      hoverCard?.classList.add('visible');
+    }, true);
+  });
+  hoverCard?.addEventListener('pointerenter', () => window.clearTimeout(hoverLeaveTimer));
+  hoverCard?.addEventListener('pointerleave', () => hoverCard?.classList.remove('visible'));
+  const openHoverDetail = (node: HTMLButtonElement) => {
+    if (!hoverDetailPanel || !hoverWorld || !hoverDetail || !hoverKicker || !hoverTitle || !hoverSubtitle || !hoverCopy || !hoverLink) return;
+    hoverDetailPanel.dataset.node = node.dataset.node || '';
+    hoverDetailPanel.setAttribute('aria-hidden', 'false');
+    hoverWorld.dataset.active = node.dataset.index || '';
+    hoverKicker.textContent = node.classList.contains('leaf') ? 'DETAIL / PORTFOLIO NODE' : 'SECTION / PORTFOLIO MAP';
+    hoverTitle.textContent = node.dataset.title || '';
+    hoverSubtitle.textContent = node.dataset.description || '';
+    hoverCopy.textContent = node.dataset.detail || '';
+    if (node.dataset.href) { hoverLink.href = node.dataset.href; hoverLink.hidden = false; } else hoverLink.hidden = true;
+    history.pushState({ node: node.dataset.node }, '', `?node=${node.dataset.node}`);
+    hoverDetail.focus();
+    hoverCard?.classList.remove('visible');
+  };
+  hoverCardOpen?.addEventListener('click', () => {
+    if (hoverCardNode) openHoverDetail(hoverCardNode);
+  });
+  window.addEventListener('portfolio:open-detail', (event) => {
+    const node = hoverCardNodes.find((candidate) => candidate.dataset.node === (event as CustomEvent<string>).detail);
+    if (node) openHoverDetail(node);
   });
 </script>
 <script>
@@ -150,6 +211,27 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
   renderBoardFocus();
 </script>
 <script>
+  const floatingDetail = document.querySelector<HTMLElement>('.detail-panel');
+  const floatingViewport = document.querySelector<HTMLElement>('.map-viewport');
+  const floatingNodes = [...document.querySelectorAll<HTMLButtonElement>('.map-node')];
+  const placeFloatingDetail = () => {
+    if (!floatingDetail || !floatingViewport || floatingDetail.getAttribute('aria-hidden') !== 'false') return;
+    const node = floatingNodes.find((candidate) => candidate.dataset.node === floatingDetail.dataset.node);
+    if (!node) return;
+    const nodeRect = node.getBoundingClientRect();
+    const viewportRect = floatingViewport.getBoundingClientRect();
+    const cardWidth = Math.min(490, viewportRect.width - 32);
+    const cardHeight = Math.min(620, viewportRect.height - 32);
+    const preferredLeft = nodeRect.left - viewportRect.left + 24;
+    const preferredTop = nodeRect.top - viewportRect.top - 26;
+    floatingDetail.style.setProperty('--detail-left', `${Math.min(viewportRect.width - cardWidth - 16, Math.max(16, preferredLeft))}px`);
+    floatingDetail.style.setProperty('--detail-top', `${Math.min(viewportRect.height - cardHeight - 16, Math.max(16, preferredTop))}px`);
+    floatingDetail.scrollTop = 0;
+  };
+  if (floatingDetail) new MutationObserver(() => requestAnimationFrame(placeFloatingDetail)).observe(floatingDetail, { attributes: true, attributeFilter: ['data-node', 'aria-hidden'] });
+  window.addEventListener('resize', placeFloatingDetail);
+</script>
+<script>
   const landingPanel = document.querySelector<HTMLElement>('.detail-landing');
   const landingList = landingPanel?.querySelector<HTMLUListElement>('ul');
   const landingGraphPanel = document.querySelector<HTMLElement>('.detail-panel');
@@ -193,13 +275,13 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
     const overview = transformFor(900, 600, overviewScale);
     const current = getComputedStyle(cameraWorld).transform;
     if (reduced) {
-      node.click();
+      window.dispatchEvent(new CustomEvent('portfolio:open-detail', { detail: id }));
       cameraWorld.style.transform = transformFor(x, y, 1.35);
       return;
     }
     await playTransform(current, overview, 440);
     cameraWorld.style.transform = overview;
-    node.click();
+    window.dispatchEvent(new CustomEvent('portfolio:open-detail', { detail: id }));
     await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     const focused = transformFor(x, y, 1.35);
     await playTransform(overview, focused, 760);
