@@ -56,13 +56,8 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
       <div class="map-world">
         <svg class="map-lines" viewBox="0 0 1800 1200" aria-hidden="true">
           {links.map(([from, to]) => <line data-from={from} data-to={to} />)}
-          <line class="detail-connector" />
         </svg>
         {nodes.map((node, index) => <button class:list={['map-node', node.type]} type="button" data-index={index} data-node={node.id} data-parent={node.parent} data-title={node.label} data-description={node.description} data-detail={node.detail} data-highlights={JSON.stringify(node.highlights ?? [])} data-href={node.href} style={`--x:${node.x}px;--y:${node.y}px`} aria-controls="node-detail"><span>{node.label}</span></button>)}
-        <aside class="detail-panel" aria-hidden="true">
-          <button class="detail-close" type="button" aria-label="상세 패널 닫기">×</button><button class="detail-back" type="button" hidden>← BACK</button>
-          <section id="node-detail" tabindex="-1"><p class="detail-kicker"></p><h1 class="detail-title"></h1><strong class="detail-subtitle"></strong><div class="detail-copy"></div><div class="detail-landing" hidden><p>PROJECT HIGHLIGHTS</p><ul></ul></div><nav class="detail-children" aria-label="하위 항목"></nav><a class="detail-link" target="_blank" rel="noreferrer">SOURCE ↗</a></section>
-        </aside>
       </div>
       <div class="node-tooltip" role="button" tabindex="0" aria-label="노드 상세 열기"><span class="tooltip-label"></span><p class="tooltip-copy"></p><span class="tooltip-action">CLICK TO EXPAND ↗</span></div>
     </div>
@@ -72,6 +67,10 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
     <nav class="map-project-index" aria-label="기존 프로젝트 상세 페이지">
       {projects.map((project) => <a href={`/projects/${project.slug}/`}>{project.title}</a>)}
     </nav>
+    <aside class="detail-panel" aria-hidden="true">
+      <button class="detail-close" type="button" aria-label="상세 패널 닫기">×</button><button class="detail-back" type="button" hidden>← BACK</button>
+      <section id="node-detail" tabindex="-1"><p class="detail-kicker"></p><h1 class="detail-title"></h1><strong class="detail-subtitle"></strong><div class="detail-copy"></div><div class="detail-landing" hidden><p>PROJECT HIGHLIGHTS</p><ul></ul></div><nav class="detail-children" aria-label="하위 항목"></nav><a class="detail-link" target="_blank" rel="noreferrer">SOURCE ↗</a></section>
+    </aside>
   </main>
 </Layout>
 <script>
@@ -221,36 +220,6 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
   };
   if (focusPanel) new MutationObserver(renderBoardFocus).observe(focusPanel, { attributes: true, attributeFilter: ['data-node'] });
   renderBoardFocus();
-</script>
-<script>
-  const floatingDetail = document.querySelector<HTMLElement>('.detail-panel');
-  const floatingNodes = [...document.querySelectorAll<HTMLButtonElement>('.map-node')];
-  const detailConnector = document.querySelector<SVGLineElement>('.detail-connector');
-  const placeFloatingDetail = () => {
-    if (!floatingDetail || floatingDetail.getAttribute('aria-hidden') !== 'false') return;
-    const node = floatingNodes.find((candidate) => candidate.dataset.node === floatingDetail.dataset.node);
-    if (!node) return;
-    const x = Number.parseFloat(node.style.getPropertyValue('--x'));
-    const y = Number.parseFloat(node.style.getPropertyValue('--y'));
-    const cardX = x + (node.classList.contains('core') ? 245 : 190);
-    const cardY = y - 255;
-    floatingDetail.style.setProperty('--detail-world-x', `${cardX}px`);
-    floatingDetail.style.setProperty('--detail-world-y', `${cardY}px`);
-    detailConnector?.setAttribute('x1', `${x}`);
-    detailConnector?.setAttribute('y1', `${y}`);
-    detailConnector?.setAttribute('x2', `${cardX}`);
-    detailConnector?.setAttribute('y2', `${y}`);
-    floatingDetail.scrollTop = 0;
-  };
-  const hideDetailConnector = () => { if (detailConnector) detailConnector.removeAttribute('data-visible'); };
-  const updateFloatingDetail = () => {
-    if (floatingDetail?.getAttribute('aria-hidden') === 'false') {
-      placeFloatingDetail();
-      detailConnector?.setAttribute('data-visible', 'true');
-    } else hideDetailConnector();
-  };
-  if (floatingDetail) new MutationObserver(() => requestAnimationFrame(updateFloatingDetail)).observe(floatingDetail, { attributes: true, attributeFilter: ['data-node', 'aria-hidden'] });
-  updateFloatingDetail();
 </script>
 <script>
   const landingPanel = document.querySelector<HTMLElement>('.detail-landing');
