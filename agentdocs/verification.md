@@ -201,3 +201,4 @@
 - 브라우저에서 `MAIN PROJECTS` 노드를 선택한 후 표시된 간단 설명 카드를 클릭해, 상세 설명과 네 개의 하위 프로젝트 버튼이 있는 확장 카드 및 `?node=projects` URL을 확인했다.
 - 하위의 `SATELLITE IMAGE AGENT`를 선택해 해당 상세 카드와 Project Highlights가 열리는 것도 확인했다.
 - `pnpm build`와 `pnpm test`를 실행했고, Astro 진단은 오류·경고·힌트 0개, 테스트는 2개 통과했다.
+- 그래프 노드 자체를 클릭해도 같은 상세 카드가 바로 열리도록 보완했고, `MAIN PROJECTS` 클릭 뒤 `aria-hidden="false"`, 제목 `MAIN PROJECTS`, URL `?node=projects` 상태를 다시 확인했다.

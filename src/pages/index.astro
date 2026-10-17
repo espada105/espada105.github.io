@@ -130,6 +130,10 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
       hoverCardNode = node;
       placeHoverCard(node);
       hoverCard?.classList.add('visible');
+      // Keep the hover card as the preview, but make the graph node itself a
+      // reliable expansion target as well. Users should not need to move the
+      // pointer from a small node to a floating card before seeing details.
+      openHoverDetail(node);
     }, true);
   });
   hoverCard?.addEventListener('pointerenter', () => window.clearTimeout(hoverLeaveTimer));
