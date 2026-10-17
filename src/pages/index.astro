@@ -337,22 +337,26 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
   const centerGraphNode = (id?: string) => {
     const node = graphSurfaceNodes.find((candidate) => candidate.dataset.node === id);
     if (!node || !graphSurface || !graphSurfaceWorld) return;
-    // Opening the dock changes the viewport width through :has(). Wait for
-    // that style to settle before reading its bounds, otherwise a leaf node
-    // is centered against the full screen and ends up hidden behind the dock.
+    // The dock stays visually transparent. Keep the graph full-screen behind
+    // it, but use the left reading-free area as the node's focus target.
     requestAnimationFrame(() => requestAnimationFrame(() => {
       const viewport = graphSurface.getBoundingClientRect();
+      const dock = document.querySelector<HTMLElement>('.detail-panel[aria-hidden="false"]');
+      const dockRect = dock?.getBoundingClientRect();
+      const focusWidth = dockRect && window.matchMedia('(min-width: 761px)').matches
+        ? Math.max(320, dockRect.left - viewport.left - 24)
+        : viewport.width;
       const nodeX = Number.parseFloat(node.style.getPropertyValue('--x'));
       const nodeY = Number.parseFloat(node.style.getPropertyValue('--y'));
-      const scale = Math.max(.92, Math.min(1.2, viewport.width / 520));
-      const target = `translate3d(${viewport.width / 2 - nodeX * scale}px,${viewport.height / 2 - nodeY * scale}px,0) scale(${scale})`;
+      const scale = Math.max(.92, Math.min(1.2, focusWidth / 520));
+      const target = `translate3d(${focusWidth / 2 - nodeX * scale}px,${viewport.height / 2 - nodeY * scale}px,0) scale(${scale})`;
       const current = getComputedStyle(graphSurfaceWorld).transform;
       graphSurfaceWorld.getAnimations().forEach((animation) => animation.cancel());
       const settleOnSelectedNode = () => {
         const renderedNode = node.getBoundingClientRect();
         const renderedViewport = graphSurface.getBoundingClientRect();
         const state = readWorldTransform();
-        const shiftX = renderedViewport.left + renderedViewport.width / 2 - (renderedNode.left + renderedNode.width / 2);
+        const shiftX = renderedViewport.left + focusWidth / 2 - (renderedNode.left + renderedNode.width / 2);
         const shiftY = renderedViewport.top + renderedViewport.height / 2 - (renderedNode.top + renderedNode.height / 2);
         if (Math.abs(shiftX) < 1 && Math.abs(shiftY) < 1) return;
         const aligned = `translate3d(${state.x + shiftX}px,${state.y + shiftY}px,0) scale(${state.scale})`;

@@ -35,8 +35,8 @@
 .detail-panel[aria-hidden='false']{transform:translateY(0) scale(1);opacity:1;pointer-events:auto}
 @media(max-width:760px){.portfolio-map:has(.detail-panel[aria-hidden='false']) .map-viewport{right:0}.detail-panel,.detail-panel.leaf-detail{top:70px;right:16px;width:calc(100vw - 32px);max-height:calc(100svh - 102px)}}
 
-/* The reading dock reserves room for long project names without covering the graph. */
-.portfolio-map:has(.detail-panel[aria-hidden='false']) .map-viewport,.portfolio-map:has(.detail-panel.leaf-detail[aria-hidden='false']) .map-viewport{right:min(calc(40rem + clamp(24px,5.5vw,108px) + 24px),calc(100vw - 64px))}
+/* The reading dock is transparent, so graph lines keep running behind it. */
+.portfolio-map:has(.detail-panel[aria-hidden='false']) .map-viewport,.portfolio-map:has(.detail-panel.leaf-detail[aria-hidden='false']) .map-viewport{right:0}
 .detail-panel,.detail-panel.leaf-detail{width:min(40rem,calc(100vw - 32px));max-height:calc(100svh - 140px);padding:50px 36px 34px}
 .detail-panel section,.detail-panel.leaf-detail section{padding-top:44px}
 .detail-panel h1,.detail-panel.leaf-detail h1{max-width:none;font-size:clamp(2.35rem,3.5vw,4.3rem);line-height:.88;overflow-wrap:anywhere}
