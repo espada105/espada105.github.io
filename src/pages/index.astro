@@ -59,7 +59,7 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
         </svg>
         {nodes.map((node, index) => <button class:list={['map-node', node.type]} type="button" data-index={index} data-node={node.id} data-parent={node.parent} data-title={node.label} data-description={node.description} data-detail={node.detail} data-highlights={JSON.stringify(node.highlights ?? [])} data-href={node.href} style={`--x:${node.x}px;--y:${node.y}px`} aria-controls="node-detail"><span>{node.label}</span></button>)}
       </div>
-      <div class="node-tooltip" role="status" aria-live="polite"><span class="tooltip-label"></span><p class="tooltip-copy"></p><button class="tooltip-open" type="button">OPEN ↗</button></div>
+      <div class="node-tooltip" role="button" tabindex="0" aria-label="노드 상세 열기"><span class="tooltip-label"></span><p class="tooltip-copy"></p><span class="tooltip-action">CLICK TO EXPAND ↗</span></div>
     </div>
     <div class="map-identity">SEONGINHONG</div>
     <div class="map-action-log" aria-live="polite" aria-atomic="false"></div>
@@ -92,7 +92,6 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
 </script>
 <script>
   const hoverCard = document.querySelector<HTMLElement>('.node-tooltip');
-  const hoverCardOpen = document.querySelector<HTMLButtonElement>('.tooltip-open');
   const hoverViewport = document.querySelector<HTMLElement>('.map-viewport');
   const hoverDetailPanel = document.querySelector<HTMLElement>('.detail-panel');
   const hoverWorld = document.querySelector<HTMLElement>('.map-world');
@@ -105,6 +104,12 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
   const hoverCardNodes = [...document.querySelectorAll<HTMLButtonElement>('.map-node')];
   let hoverCardNode: HTMLButtonElement | undefined;
   let hoverLeaveTimer = 0;
+  // The viewport owns graph dragging. Stop its pointer-down handler from
+  // claiming interactions that begin inside an overlay card, otherwise the
+  // card's click is turned into a drag before its detail action can run.
+  hoverViewport?.addEventListener('pointerdown', (event: PointerEvent) => {
+    if ((event.target as HTMLElement).closest('.node-tooltip, .detail-panel')) event.stopImmediatePropagation();
+  }, true);
   const placeHoverCard = (node: HTMLButtonElement) => {
     if (!hoverCard || !hoverViewport) return;
     const nodeRect = node.getBoundingClientRect();
@@ -116,7 +121,7 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
     node.addEventListener('pointerenter', () => { hoverCardNode = node; window.clearTimeout(hoverLeaveTimer); });
     node.addEventListener('pointerleave', (event: PointerEvent) => {
       event.stopImmediatePropagation();
-      hoverLeaveTimer = window.setTimeout(() => { if (!hoverCard?.matches(':hover')) hoverCard?.classList.remove('visible'); }, 100);
+      hoverLeaveTimer = window.setTimeout(() => { if (!hoverCard?.matches(':hover')) hoverCard?.classList.remove('visible'); }, 320);
     }, true);
     node.addEventListener('click', (event: MouseEvent) => {
       if (node.dataset.openDetail === 'true') { delete node.dataset.openDetail; return; }
@@ -143,8 +148,10 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
     hoverDetail.focus();
     hoverCard?.classList.remove('visible');
   };
-  hoverCardOpen?.addEventListener('click', () => {
-    if (hoverCardNode) openHoverDetail(hoverCardNode);
+  const expandHoverCard = () => { if (hoverCardNode) openHoverDetail(hoverCardNode); };
+  hoverCard?.addEventListener('click', expandHoverCard);
+  hoverCard?.addEventListener('keydown', (event: KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); expandHoverCard(); }
   });
   window.addEventListener('portfolio:open-detail', (event) => {
     const node = hoverCardNodes.find((candidate) => candidate.dataset.node === (event as CustomEvent<string>).detail);
