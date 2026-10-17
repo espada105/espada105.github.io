@@ -202,3 +202,8 @@
 - 하위의 `SATELLITE IMAGE AGENT`를 선택해 해당 상세 카드와 Project Highlights가 열리는 것도 확인했다.
 - `pnpm build`와 `pnpm test`를 실행했고, Astro 진단은 오류·경고·힌트 0개, 테스트는 2개 통과했다.
 - 그래프 노드 자체를 클릭해도 같은 상세 카드가 바로 열리도록 보완했고, `MAIN PROJECTS` 클릭 뒤 `aria-hidden="false"`, 제목 `MAIN PROJECTS`, URL `?node=projects` 상태를 다시 확인했다.
+
+## 그래프 월드 상세 카드 검증 — 2026-10-17
+
+- 상세 카드를 `.map-world` 내부로 옮겼다. 따라서 그래프 드래그·확대·축소 변환을 노드와 동일하게 상속하며 화면 우측에 고정되지 않는다.
+- 선택한 노드의 점 중심에서 상세 카드 왼쪽까지 굵은 흰 연결선을 표시한다. `PROFILE` 선택 뒤 연결선의 최종 `stroke-opacity: 1`과 상세 카드의 열린 상태를 브라우저에서 확인했다.
