@@ -288,35 +288,68 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const liveNodes = [...document.querySelectorAll<HTMLButtonElement>('.map-node')];
   const liveLines = [...document.querySelectorAll<SVGLineElement>('.map-lines line')];
-  const basePositions = liveNodes.map((node) => ({
-    node,
-    x: Number.parseFloat(node.style.getPropertyValue('--x')),
-    y: Number.parseFloat(node.style.getPropertyValue('--y')),
-    phase: Number(node.dataset.index || 0) * 0.73,
-  }));
-
-  if (!reduceMotion.matches) {
-    const animateGraph = (time: number) => {
-      const positions = basePositions.map(({ node, x, y, phase }) => {
-        const amplitude = node.classList.contains('leaf') ? 6 : node.classList.contains('branch') ? 4 : 2;
-        const offsetX = Math.sin(time / 2900 + phase) * amplitude;
-        const offsetY = Math.cos(time / 3500 + phase * 1.3) * amplitude;
-        node.style.translate = `${offsetX}px ${offsetY}px`;
-        return { x: x + offsetX, y: y + offsetY };
-      });
-
-      liveLines.forEach((line) => {
-        const from = positions[Number(line.dataset.from)];
-        const to = positions[Number(line.dataset.to)];
-        line.setAttribute('x1', `${from.x}`);
-        line.setAttribute('y1', `${from.y}`);
-        line.setAttribute('x2', `${to.x}`);
-        line.setAttribute('y2', `${to.y}`);
-      });
-      requestAnimationFrame(animateGraph);
-    };
-    requestAnimationFrame(animateGraph);
-  }
+  const particles = liveNodes.map((node) => {
+    const x = Number.parseFloat(node.style.getPropertyValue('--x'));
+    const y = Number.parseFloat(node.style.getPropertyValue('--y'));
+    return { node, x, y, homeX: x, homeY: y, vx: 0, vy: 0 };
+  });
+  const springs = liveLines.map((line) => {
+    const from = Number(line.dataset.from), to = Number(line.dataset.to);
+    return { line, from, to, length: Math.hypot(particles[to].x - particles[from].x, particles[to].y - particles[from].y) };
+  });
+  let held: { index: number; x: number; y: number } | undefined;
+  let frame = 0;
+  const render = () => {
+    particles.forEach(({ node, x, y }) => {
+      node.style.setProperty('--x', `${x}px`);
+      node.style.setProperty('--y', `${y}px`);
+    });
+    springs.forEach(({ line, from, to }) => {
+      line.setAttribute('x1', `${particles[from].x}`);
+      line.setAttribute('y1', `${particles[from].y}`);
+      line.setAttribute('x2', `${particles[to].x}`);
+      line.setAttribute('y2', `${particles[to].y}`);
+    });
+  };
+  const tick = () => {
+    frame = 0;
+    springs.forEach(({ from, to, length }) => {
+      const a = particles[from], b = particles[to];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const distance = Math.hypot(dx, dy) || 1;
+      const force = (distance - length) * .025;
+      const fx = dx / distance * force, fy = dy / distance * force;
+      a.vx += fx; a.vy += fy; b.vx -= fx; b.vy -= fy;
+    });
+    let moving = false;
+    particles.forEach((p, index) => {
+      if (held?.index === index) { p.vx = 0; p.vy = 0; return; }
+      p.vx = (p.vx + (p.homeX - p.x) * .002) * .88;
+      p.vy = (p.vy + (p.homeY - p.y) * .002) * .88;
+      p.x += p.vx; p.y += p.vy;
+      if (Math.abs(p.vx) + Math.abs(p.vy) > .02 || Math.abs(p.x - p.homeX) + Math.abs(p.y - p.homeY) > .5) moving = true;
+    });
+    render();
+    if (held || moving) frame = requestAnimationFrame(tick);
+  };
+  const startSimulation = () => { if (!frame) frame = requestAnimationFrame(tick); };
+  window.addEventListener('portfolio:drag-node', (event) => {
+    const { node, dx, dy } = (event as CustomEvent<{ node: HTMLButtonElement; dx: number; dy: number }>).detail;
+    const index = liveNodes.indexOf(node);
+    if (index < 0) return;
+    if (!held || held.index !== index) held = { index, x: particles[index].x, y: particles[index].y };
+    particles[index].x = held.x + dx;
+    particles[index].y = held.y + dy;
+    render();
+    startSimulation();
+  });
+  window.addEventListener('portfolio:release-node', () => {
+    held = undefined;
+    if (reduceMotion.matches) {
+      particles.forEach((p) => { p.homeX = p.x; p.homeY = p.y; p.vx = 0; p.vy = 0; });
+    }
+    startSimulation();
+  });
 </script>
 <script>
   const graphSurface = document.querySelector<HTMLElement>('.map-viewport');
@@ -392,8 +425,8 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
   // This capture-phase controller owns drag and zoom after a camera move. It
   // reads the rendered transform, so closing a detail card can never restore a
   // stale pre-focus graph position or leave dragging disabled. A node remains
-  // clickable when tapped, but becomes a handle for the whole world once the
-  // pointer has moved far enough to be an intentional drag.
+  // clickable when tapped; dragging it pulls its connected nodes. Empty-space
+  // dragging pans the world.
   graphSurface?.addEventListener('pointerdown', (event) => {
     if ((event.target as HTMLElement).closest('.node-tooltip, .detail-panel')) return;
     const node = (event.target as HTMLElement).closest<HTMLButtonElement>('.map-node') || undefined;
@@ -415,12 +448,21 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
       graphSurface?.setPointerCapture(event.pointerId);
       graphSurface?.classList.add('dragging');
     }
-    writeWorldTransform(graphDrag.worldX + event.clientX - graphDrag.x, graphDrag.worldY + event.clientY - graphDrag.y, graphDrag.scale);
+    if (graphDrag.node) {
+      window.dispatchEvent(new CustomEvent('portfolio:drag-node', { detail: {
+        node: graphDrag.node,
+        dx: (event.clientX - graphDrag.x) / graphDrag.scale,
+        dy: (event.clientY - graphDrag.y) / graphDrag.scale,
+      } }));
+    } else {
+      writeWorldTransform(graphDrag.worldX + event.clientX - graphDrag.x, graphDrag.worldY + event.clientY - graphDrag.y, graphDrag.scale);
+    }
     event.preventDefault();
     event.stopImmediatePropagation();
   }, true);
   const releaseGraphDrag = (event: PointerEvent) => {
     if (!graphDrag || event.pointerId !== graphDrag.pointerId || !graphSurface) return;
+    if (graphDrag.moved && graphDrag.node) window.dispatchEvent(new CustomEvent('portfolio:release-node'));
     if (event.type === 'pointerup' && graphDrag.moved && graphDrag.node) {
       suppressNodeClick = true;
       window.setTimeout(() => { suppressNodeClick = false; }, 0);
