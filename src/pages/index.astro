@@ -322,7 +322,8 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
   const graphSurface = document.querySelector<HTMLElement>('.map-viewport');
   const graphSurfaceWorld = document.querySelector<HTMLElement>('.map-world');
   const graphSurfaceNodes = [...document.querySelectorAll<HTMLButtonElement>('.map-node')];
-  let graphDrag: { pointerId: number; x: number; y: number; worldX: number; worldY: number; scale: number } | undefined;
+  let graphDrag: { pointerId: number; x: number; y: number; worldX: number; worldY: number; scale: number; moved: boolean; node?: HTMLButtonElement } | undefined;
+  let suppressNodeClick = false;
 
   const readWorldTransform = () => {
     if (!graphSurfaceWorld) return { x: 0, y: 0, scale: 1 };
@@ -390,24 +391,40 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
 
   // This capture-phase controller owns drag and zoom after a camera move. It
   // reads the rendered transform, so closing a detail card can never restore a
-  // stale pre-focus graph position or leave dragging disabled.
+  // stale pre-focus graph position or leave dragging disabled. A node remains
+  // clickable when tapped, but becomes a handle for the whole world once the
+  // pointer has moved far enough to be an intentional drag.
   graphSurface?.addEventListener('pointerdown', (event) => {
-    if ((event.target as HTMLElement).closest('.map-node, .node-tooltip, .detail-panel')) return;
+    if ((event.target as HTMLElement).closest('.node-tooltip, .detail-panel')) return;
+    const node = (event.target as HTMLElement).closest<HTMLButtonElement>('.map-node') || undefined;
     const state = readWorldTransform();
-    graphDrag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, worldX: state.x, worldY: state.y, scale: state.scale };
-    graphSurface.setPointerCapture(event.pointerId);
-    graphSurface.classList.add('dragging');
-    event.preventDefault();
-    event.stopImmediatePropagation();
+    graphDrag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, worldX: state.x, worldY: state.y, scale: state.scale, moved: false, node };
+    if (!node) {
+      graphSurface.setPointerCapture(event.pointerId);
+      graphSurface.classList.add('dragging');
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
   }, true);
   graphSurface?.addEventListener('pointermove', (event) => {
     if (!graphDrag || event.pointerId !== graphDrag.pointerId) return;
+    const distance = Math.hypot(event.clientX - graphDrag.x, event.clientY - graphDrag.y);
+    if (!graphDrag.moved && distance < 5) return;
+    if (!graphDrag.moved) {
+      graphDrag.moved = true;
+      graphSurface?.setPointerCapture(event.pointerId);
+      graphSurface?.classList.add('dragging');
+    }
     writeWorldTransform(graphDrag.worldX + event.clientX - graphDrag.x, graphDrag.worldY + event.clientY - graphDrag.y, graphDrag.scale);
     event.preventDefault();
     event.stopImmediatePropagation();
   }, true);
   const releaseGraphDrag = (event: PointerEvent) => {
     if (!graphDrag || event.pointerId !== graphDrag.pointerId || !graphSurface) return;
+    if (event.type === 'pointerup' && graphDrag.moved && graphDrag.node) {
+      suppressNodeClick = true;
+      window.setTimeout(() => { suppressNodeClick = false; }, 0);
+    }
     if (graphSurface.hasPointerCapture(event.pointerId)) graphSurface.releasePointerCapture(event.pointerId);
     graphDrag = undefined;
     graphSurface.classList.remove('dragging');
@@ -415,6 +432,12 @@ const links: [number, number][] = nodes.flatMap((node, index) => node.parent ? [
   };
   graphSurface?.addEventListener('pointerup', releaseGraphDrag, true);
   graphSurface?.addEventListener('pointercancel', releaseGraphDrag, true);
+  graphSurface?.addEventListener('click', (event) => {
+    if (!suppressNodeClick) return;
+    suppressNodeClick = false;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, true);
   graphSurface?.addEventListener('wheel', (event) => {
     if (!graphSurface) return;
     const state = readWorldTransform();

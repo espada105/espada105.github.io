@@ -1,5 +1,9 @@
 # 구현 기록
 
+## 그래프 노드 드래그 복구 — 2026-11-04
+
+`src/pages/index.astro`의 후속 카메라 제어기가 노드에서 시작한 pointer 입력을 드래그 대상에서 제외하고 있었다. 노드를 클릭할 때는 상세를 열되, 5px 이상 이동하면 해당 클릭을 취소하고 `map-world` 전체의 transform을 이동하도록 바꿨다. SVG 간선과 노드는 모두 `map-world`의 자식이므로 노드를 잡아도 그래프 전체가 함께 이동한다.
+
 ## Graph Focus Lines + HUD Position — 2026-10-16
 
 노드 hover와 키보드 focus 시 해당 노드의 `data-index`에 연결된 SVG 간선에 `is-connected` 클래스를 적용해 밝은 선과 가벼운 glow로 강조했다. Contact의 이메일 하위 노드도 이 규칙을 따른다. 그래프 HUD는 좌측 하단으로 재배치했고, `SEONGINHONG`은 좌표값 위에, Overview 링크는 좌측 상단에 뒀다.
